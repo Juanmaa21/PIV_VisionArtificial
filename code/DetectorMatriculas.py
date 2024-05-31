@@ -3,10 +3,11 @@ import cv2
 import matplotlib.pyplot as plt
 import pytesseract
 import skimage
-pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe'
 
 class DetectorMatriculas:
     def __init__(self):
+        # Configurar la ruta de Tesseract
+        pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe'
         self.ratio = 520/110 # Dimensiones matricula europea
         self.min_w = 64
         self.max_w = 256
@@ -14,8 +15,8 @@ class DetectorMatriculas:
         self.max_h = 64
     
     # Muestra una imagen cualquiera
-    def mostrarImagen(self, img, titulo):
-        cv2.imshow(titulo,img)
+    def mostrarImagen(self, img):
+        cv2.imshow('Imagen',img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -74,7 +75,6 @@ class DetectorMatriculas:
         cv2.drawContours(canvas, contornos, -1, (0, 255, 0), 2)
         plt.axis('off')
         plt.imshow(canvas)
-        plt.title('Contornos')
         plt.show()
 
     def filtrarCandidatos(self, contornos):
@@ -93,7 +93,6 @@ class DetectorMatriculas:
         cv2.drawContours(canvas, candidatos, -1, (0, 255, 0), 2)
         plt.axis('off')
         plt.imshow(canvas)
-        plt.title('Candidatos')
         plt.show()
 
     def filtrarMenorCandidato(self, candidatos):
@@ -108,5 +107,21 @@ class DetectorMatriculas:
         cv2.drawContours(canvas, [candidato], -1, (0, 255, 0), 2)
         plt.axis('off')
         plt.imshow(canvas)
-        plt.title('Matrícula detectada')
         plt.show()
+
+    def recortarMatricula(self, img, candidato):
+        x, y, w, h = cv2.boundingRect(candidato)
+        return img[y:y+h,x:x+w]
+    
+    def eliminarBordes(self, img):
+        return skimage.segmentation.clear_border(img)
+    
+    def invertirImagen(self, img):
+        return cv2.bitwise_not(img)
+    
+    def hallarMatricula(self, img):
+        alphanumeric = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        options = "-c tessedit_char_whitelist={}".format(alphanumeric)
+        options += " -- psm 7"
+        txt = pytesseract.image_to_string(img, config=options)
+        return txt[1:]

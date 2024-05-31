@@ -8,21 +8,35 @@ import DetectorMatriculas as DM
 dm = DM.DetectorMatriculas()
 img = img = cv2.imread("./dataset/coche1.png")
 print(img.shape)
-dm.mostrarImagen(img, "Imagen original",)
+dm.mostrarImagen(img)
 
-dm.mostrarRGB(img)
+#dm.mostrarRGB(img)
 
 imgBW = dm.toEscalaDeGrises(img)
-dm.mostrarImagen(imgBW, "Escala de grises")
+#dm.mostrarImagen(imgBW)
 
 imgBIN = dm.aplicarUmbrealizacionAdaptativa(imgBW)
-dm.mostrarImagen(imgBIN, "Umbrealizacion")
+#dm.mostrarImagen(imgBIN)
 
 contornos = dm.encontrarContornos(imgBIN)
-dm.mostrarContornos(img, contornos)
+#dm.mostrarContornos(img, contornos)
 
 candidatos = dm.filtrarCandidatos(contornos)
-dm.mostrarCandidatos(img, candidatos)
+#dm.mostrarCandidatos(img, candidatos)
 
 candidatoMenor = dm.filtrarMenorCandidato(candidatos)
-dm.mostrarMenorCandidato(img, candidatoMenor)
+#dm.mostrarMenorCandidato(img, candidatoMenor)
+
+matricula = dm.recortarMatricula(img, candidatoMenor)
+dm.mostrarImagen(matricula)
+
+matriculaBIN = dm.aplicarUmbrealizacionAdaptativa(dm.toEscalaDeGrises(matricula))
+dm.mostrarImagen(matriculaBIN)
+
+matriculaBINSinBordes = dm.eliminarBordes(matriculaBIN)
+dm.mostrarImagen(matriculaBINSinBordes)
+
+matriculaFinal = dm.invertirImagen(matriculaBINSinBordes)
+dm.mostrarImagen(matriculaFinal)
+
+print(dm.hallarMatricula(matriculaFinal))
