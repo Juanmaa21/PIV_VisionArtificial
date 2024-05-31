@@ -8,15 +8,15 @@ import DetectorMatriculas as DM
 dm = DM.DetectorMatriculas()
 img = img = cv2.imread("./dataset/coche1.png")
 print(img.shape)
-dm.mostrarImagen(img)
+dm.mostrarImagen(img, "Imagen original",)
 
 dm.mostrarRGB(img)
 
 imgBW = dm.toEscalaDeGrises(img)
-dm.mostrarImagen(imgBW)
+dm.mostrarImagen(imgBW, "Escala de grises")
 
 imgBIN = dm.aplicarUmbrealizacionAdaptativa(imgBW)
-dm.mostrarImagen(imgBIN)
+dm.mostrarImagen(imgBIN, "Umbrealizacion")
 
 contornos = dm.encontrarContornos(imgBIN)
 dm.mostrarContornos(img, contornos)

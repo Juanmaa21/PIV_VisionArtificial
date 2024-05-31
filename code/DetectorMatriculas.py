@@ -14,8 +14,8 @@ class DetectorMatriculas:
         self.max_h = 64
     
     # Muestra una imagen cualquiera
-    def mostrarImagen(self, img):
-        cv2.imshow('Imagen',img)
+    def mostrarImagen(self, img, titulo):
+        cv2.imshow(titulo,img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -74,6 +74,7 @@ class DetectorMatriculas:
         cv2.drawContours(canvas, contornos, -1, (0, 255, 0), 2)
         plt.axis('off')
         plt.imshow(canvas)
+        plt.title('Contornos')
         plt.show()
 
     def filtrarCandidatos(self, contornos):
@@ -92,6 +93,7 @@ class DetectorMatriculas:
         cv2.drawContours(canvas, candidatos, -1, (0, 255, 0), 2)
         plt.axis('off')
         plt.imshow(canvas)
+        plt.title('Candidatos')
         plt.show()
 
     def filtrarMenorCandidato(self, candidatos):
@@ -106,4 +108,5 @@ class DetectorMatriculas:
         cv2.drawContours(canvas, [candidato], -1, (0, 255, 0), 2)
         plt.axis('off')
         plt.imshow(canvas)
+        plt.title('Matrícula detectada')
         plt.show()
