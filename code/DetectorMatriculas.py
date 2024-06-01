@@ -8,7 +8,7 @@ class DetectorMatriculas:
     def __init__(self):
         # Configurar la ruta de Tesseract
         pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe'
-        self.ratio = 520/110 # Dimensiones matricula europea
+        self.ratio = 520.0/120.0 # Dimensiones matricula europea
         self.min_w = 64
         self.max_w = 256
         self.min_h = 16
@@ -16,9 +16,9 @@ class DetectorMatriculas:
     
     # Muestra una imagen cualquiera
     def mostrarImagen(self, img):
-        cv2.imshow('Imagen',img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        plt.axis('off')
+        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        plt.show()
 
     # Muestra los 3 canales de color de una imagen
     def mostrarRGB(self, img):
@@ -65,9 +65,11 @@ class DetectorMatriculas:
     
     # Umbrealizar una imagen con un valor de referencia
     def aplicarUmbrealizacionAdaptativa(self, img):
-        return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 7, 13)
+        #return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 7, 13)
+        return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 9, 7)
     
     def encontrarContornos(self, img):
+        #return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
         return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
     
     def mostrarContornos(self, img, contornos):
@@ -82,7 +84,8 @@ class DetectorMatriculas:
         for c in contornos:
             x, y, w, h = cv2.boundingRect(c)
             aspect_ratio = float(w) / h
-            if (np.isclose(aspect_ratio, self.ratio, atol=0.7) and
+
+            if (np.isclose(aspect_ratio, self.ratio, atol=1.5) and
                (self.max_w > w > self.min_w) and
                (self.max_h > h > self.min_h)):
                 candidatos.append(c)
@@ -96,10 +99,9 @@ class DetectorMatriculas:
         plt.show()
 
     def filtrarMenorCandidato(self, candidatos):
-        ys = []
-        for c in candidatos:
-            x, y, w, h = cv2.boundingRect(c)
-            ys.append(y)
+        if not candidatos:
+            return None
+        ys = [cv2.boundingRect(c)[1] for c in candidatos]
         return candidatos[np.argmax(ys)]
     
     def mostrarMenorCandidato(self, img, candidato):
@@ -119,9 +121,38 @@ class DetectorMatriculas:
     def invertirImagen(self, img):
         return cv2.bitwise_not(img)
     
-    def hallarMatricula(self, img):
-        alphanumeric = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        options = "-c tessedit_char_whitelist={}".format(alphanumeric)
-        options += " -- psm 7"
+    def hallarNumerosYLetras(self, img):
+        # Las matriculas de españa no continen vocales ñ y q
+        alphanumeric = "BCDFGHJKLMNPRSTVWXYZ0123456789"
+        options = f"-c tessedit_char_whitelist={alphanumeric} -- psm 7"
         txt = pytesseract.image_to_string(img, config=options)
-        return txt[1:]
+        # estrategia: recorrer a la inversa y seleccionar 3 letras y 4 numeros
+        txt = txt[::-1]
+        letras = ""
+        numeros = ""
+        counter = 0
+        for t in txt:
+            if ((t in "BCDFGHJKLMNPRSTVWXYZ") and (counter < 3)):
+                letras += t
+                counter += 1
+            if ((t in "0123456789") and (3 <= counter < 7)):
+                numeros += t
+                counter += 1
+
+        letras += "?"*(3 - len(letras)) # si no ha detectado 3 letras, añadir ?
+        numeros += "?"*(4 - len(numeros)) # si no ha detectado 4 numeros, añadir ?
+        
+        matricula = numeros[::-1] + " " + letras[::-1]
+        return matricula
+    
+    def hallarMatricula(self, img):
+        imgBW = self.toEscalaDeGrises(img)
+        imgBIN = self.aplicarUmbrealizacionAdaptativa(imgBW)
+        contornos = self.encontrarContornos(imgBIN)
+        candidatos = self.filtrarCandidatos(contornos)
+        candidatoMenor = self.filtrarMenorCandidato(candidatos)
+        matricula = self.recortarMatricula(img, candidatoMenor)
+        matriculaBIN = self.aplicarUmbrealizacionAdaptativa(self.toEscalaDeGrises(matricula))
+        matriculaBINSinBordes = self.eliminarBordes(matriculaBIN)
+        matriculaFinal = self.invertirImagen(matriculaBINSinBordes)
+        return self.hallarNumerosYLetras(matriculaFinal)

@@ -1,31 +1,32 @@
-import numpy as np #pip install numpy
 import cv2 #pip install opencv-python
-import matplotlib.pyplot as plt #pip install matplotlib
-import pytesseract #pip install pytesseract
-import skimage #python -m pip install scikit-image
 import DetectorMatriculas as DM
 
 dm = DM.DetectorMatriculas()
-img = img = cv2.imread("./dataset/coche1.png")
+# coches: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+# coches cuya matricula coincide y solo 1 forma: 1, 2
+# coches cuya matricula coincide y mas de 1 forma: 6, 7, 8, 10
+# coches cuya matricula casi coincide y solo 1 forma:
+# coches cuya matricula casi coincide y mas de 1 forma: 3, 4, 5, 9
+img = img = cv2.imread("./dataset/coche7.png")
 print(img.shape)
 dm.mostrarImagen(img)
 
-#dm.mostrarRGB(img)
+dm.mostrarRGB(img)
 
 imgBW = dm.toEscalaDeGrises(img)
-#dm.mostrarImagen(imgBW)
+dm.mostrarImagen(imgBW)
 
 imgBIN = dm.aplicarUmbrealizacionAdaptativa(imgBW)
-#dm.mostrarImagen(imgBIN)
+dm.mostrarImagen(imgBIN)
 
 contornos = dm.encontrarContornos(imgBIN)
-#dm.mostrarContornos(img, contornos)
+dm.mostrarContornos(img, contornos)
 
 candidatos = dm.filtrarCandidatos(contornos)
-#dm.mostrarCandidatos(img, candidatos)
+dm.mostrarCandidatos(img, candidatos)
 
 candidatoMenor = dm.filtrarMenorCandidato(candidatos)
-#dm.mostrarMenorCandidato(img, candidatoMenor)
+dm.mostrarMenorCandidato(img, candidatoMenor)
 
 matricula = dm.recortarMatricula(img, candidatoMenor)
 dm.mostrarImagen(matricula)
@@ -39,4 +40,4 @@ dm.mostrarImagen(matriculaBINSinBordes)
 matriculaFinal = dm.invertirImagen(matriculaBINSinBordes)
 dm.mostrarImagen(matriculaFinal)
 
-print(dm.hallarMatricula(matriculaFinal))
+print(dm.hallarNumerosYLetras(matriculaFinal))
