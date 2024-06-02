@@ -56,8 +56,7 @@ class DetectorMatriculas:
 
     # Convertir la imagen a escala de grises
     def toEscalaDeGrises(self, img):
-        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        return img_gray
+        return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
     # Umbrealizar una imagen con un valor de referencia
     def aplicarUmbrealizacion(self, img, value):
@@ -65,11 +64,30 @@ class DetectorMatriculas:
     
     # Umbrealizar una imagen con un valor de referencia
     def aplicarUmbrealizacionAdaptativa(self, img):
-        #return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 7, 13)
         return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 9, 7)
     
+    def mostrarAmbasUmbrealizaciones(self, img):
+        # Aplicar el umbral global
+        value = 170
+        imgBIN1 = self.aplicarUmbrealizacion(img, value)
+
+        # Aplicar el umbral adaptativo
+        imgBIN2 = self.aplicarUmbrealizacionAdaptativa(img)
+
+        # Crear un plot para mostrar las imágenes originales y binarizadas
+        fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+
+        axes[0].imshow(imgBIN1, cmap='gray')
+        axes[0].set_title('Umbral Global')
+        axes[0].axis('off')
+
+        axes[1].imshow(imgBIN2, cmap='gray')
+        axes[1].set_title('Umbral Adaptativo')
+        axes[1].axis('off')
+
+        plt.show()
+    
     def encontrarContornos(self, img):
-        #return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
         return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
     
     def mostrarContornos(self, img, contornos):
@@ -127,7 +145,7 @@ class DetectorMatriculas:
         options = f"-c tessedit_char_whitelist={alphanumeric} -- psm 7"
         txt = pytesseract.image_to_string(img, config=options)
         # estrategia: recorrer a la inversa y seleccionar 3 letras y 4 numeros
-        txt = txt[::-1]
+        txt = txt[::-1].upper()
         letras = ""
         numeros = ""
         counter = 0

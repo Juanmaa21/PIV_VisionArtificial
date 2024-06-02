@@ -1,4 +1,4 @@
-import cv2 #pip install opencv-python
+import cv2
 import DetectorMatriculas as DM
 
 dm = DM.DetectorMatriculas()
@@ -7,7 +7,7 @@ dm = DM.DetectorMatriculas()
 # coches cuya matricula coincide y mas de 1 forma: 6, 7, 8, 10
 # coches cuya matricula casi coincide y solo 1 forma:
 # coches cuya matricula casi coincide y mas de 1 forma: 3, 4, 5, 9
-img = img = cv2.imread("./dataset/coche7.png")
+img = cv2.imread("./dataset/coche1.png")
 print(img.shape)
 dm.mostrarImagen(img)
 
