@@ -1,0 +1,47 @@
+\documentclass[12pt]{article}
+\usepackage{listings} % Include the listings package
+\usepackage[spanish]{babel} % En español, por favor
+\usepackage[T1]{fontenc} % Add the fontenc package with T1 encoding
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{float}
+
+\usepackage{minted}
+
+\usepackage{./Layout/EngReport}
+
+\graphicspath{{Images/}}
+\bibliography{./Layout/Sources}
+\onehalfspacing
+\graphicspath{Images/}
+\geometry{letterpaper, portrait, includeheadfoot=true, hmargin=1in, vmargin=1in}
+
+
+%\fontsize{font size}{vertsize (usually 1.2x)}\selectfont
+
+\begin{document}
+\renewcommand{\familydefault}{\rmdefault}
+
+\input{./Layout/titlepage}
+\input{./Layout/headerfooter}
+\tableofcontents
+\pagebreak
+
+
+\fontsize{12}{20}\selectfont{
+
+
+\input{./Sections/1-Teoria}
+\pagebreak
+
+\input{./Sections/2-Practica}
+\pagebreak
+
+\input{./Sections/3-Anexo}
+\pagebreak
+
+}
+
+\printbibliography
+
+\end{document}
